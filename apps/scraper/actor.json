@@ -1,0 +1,17 @@
+{
+  "actorSpecVersion": 1,
+  "name": "sync360-united-fabrics-scraper",
+  "title": "SYNC360 United Fabrics Scraper",
+  "description": "Production-grade scraper for UnitedFabrics.com. Logs in, paginates listings, extracts full product data and images, exports to Shopify, WooCommerce, and WP All Import formats.",
+  "version": "1.0.0",
+  "buildCommand": "pnpm install && pnpm build",
+  "startCommand": "node dist/src/actor.js",
+  "dockerfile": "Dockerfile",
+  "categories": [
+    "E-COMMERCE"
+  ],
+  "meta": {
+    "author": "SYNC360",
+    "license": "MIT"
+  }
+}

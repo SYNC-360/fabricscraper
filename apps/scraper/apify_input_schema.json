@@ -1,0 +1,55 @@
+{
+  "title": "SYNC360 United Fabrics Scraper",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "startUrls": {
+      "type": "array",
+      "title": "Start URLs",
+      "description": "List of URLs to start the scrape from",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "https://www.unitedfabrics.com/fabric/"
+      ]
+    },
+    "brandFilter": {
+      "type": "string",
+      "title": "Brand Filter",
+      "description": "Optional substring to filter product titles (e.g., 'Sunbrella' to only scrape Sunbrella products)"
+    },
+    "respectRobotsTxt": {
+      "type": "boolean",
+      "title": "Respect Robots.txt",
+      "description": "If true, respect robots.txt rules",
+      "default": false
+    },
+    "maxPages": {
+      "type": "integer",
+      "title": "Max Pages",
+      "description": "Maximum number of pages to scrape. Set to 0 for no limit.",
+      "default": 0
+    },
+    "concurrency": {
+      "type": "integer",
+      "title": "Concurrency",
+      "description": "Number of concurrent requests",
+      "default": 3,
+      "minimum": 1,
+      "maximum": 10
+    },
+    "ufEmail": {
+      "type": "string",
+      "title": "United Fabrics Email",
+      "description": "Email for login (reads from input if provided, else from APIFY_DEFAULT_DATASET_ID secret)"
+    },
+    "ufPassword": {
+      "type": "string",
+      "title": "United Fabrics Password",
+      "description": "Password for login (reads from input if provided, else from secret)",
+      "isSecret": true
+    }
+  },
+  "required": []
+}

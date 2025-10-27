@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm list:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 120 node:*)",
+      "Bash(node test-scrape.js:*)",
+      "Bash(npx playwright install)",
+      "Bash(node full-scrape.js:*)",
+      "Bash(node:*)",
+      "Bash(node -e:*)",
+      "Read(//Users/richard/Downloads/**)",
+      "Read(//private/tmp/united_import/bundle/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

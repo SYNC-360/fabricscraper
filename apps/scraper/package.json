@@ -1,0 +1,26 @@
+{
+  "name": "@apps/scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/src/local.js",
+    "start:actor": "node dist/src/actor.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@packages/exporters": "workspace:*",
+    "@packages/schemas": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "crawlee": "^3.5.0",
+    "dotenv": "^16.3.1",
+    "playwright": "^1.40.1",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.2.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3"
+  }
+}

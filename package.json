@@ -1,0 +1,28 @@
+{
+  "name": "sync360-united-fabrics-scraper",
+  "version": "1.0.0",
+  "description": "Production-grade UnitedFabrics.com scraper for Shopify, WooCommerce, and WP All Import",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start:scrape": "pnpm -w --filter @apps/scraper start",
+    "start:actor": "pnpm -w --filter @apps/scraper start:actor",
+    "start:api": "pnpm -w --filter @apps/status-api dev",
+    "test": "vitest",
+    "test:acceptance": "vitest run tests/acceptance.spec.ts",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  }
+}
