@@ -1,0 +1,370 @@
+================================================================================
+                  PRODUCT RECONCILIATION SYSTEM - COMPLETE
+================================================================================
+
+Date Created: October 27, 2025
+Status: READY TO USE
+
+================================================================================
+WHAT THIS SYSTEM DOES
+================================================================================
+
+The Product Reconciliation System automates checking product availability and
+synchronization across three sources:
+
+  1. VENDOR (United Fabrics)
+     - Checks if products still exist at vendor
+     - Identifies discontinued products
+     - Reports product availability status
+
+  2. WORDPRESS (bestupholsteryfabric.com)
+     - Searches for products by SKU
+     - Identifies missing products
+     - Reports sync status
+
+  3. SHOPIFY (upholsteryfabricbytheyard.com)
+     - Searches for products by name
+     - Identifies missing products
+     - Reports sync status
+
+================================================================================
+FILES CREATED (7 Total)
+================================================================================
+
+SCRIPTS (5):
+  ✓ check-product-availability.js
+    → Checks United Fabrics vendor availability
+    → Identifies discontinued products
+    → Reports on each product status
+
+  ✓ check-wordpress-products.js
+    → Checks bestupholsteryfabric.com for products
+    → Identifies missing products
+    → Reports sync status
+
+  ✓ check-shopify-products.js
+    → Checks upholsteryfabricbytheyard.com for products
+    → Identifies missing products
+    → Reports sync status
+
+  ✓ generate-reconciliation-report.js
+    → Combines all three reports
+    → Identifies action items
+    → Generates human-readable summary
+
+  ✓ run-full-reconciliation.js
+    → Master script that runs all 4 above scripts
+    → Orchestrates entire reconciliation process
+    → Recommended for first-time use
+
+DOCUMENTATION (2):
+  ✓ PRODUCT-RECONCILIATION-GUIDE.md
+    → Complete reference guide
+    → Workflow examples
+    → Advanced usage
+    → Integration instructions
+
+  ✓ QUICK-RECONCILIATION-REFERENCE.txt
+    → Quick start guide
+    → Common scenarios
+    → Troubleshooting
+
+================================================================================
+HOW TO USE
+================================================================================
+
+FIRST TIME (Full Reconciliation - 30-60 minutes):
+  1. cd /Users/richard/Desktop/Fabric\ Scraper
+  2. node run-full-reconciliation.js
+  3. cat output/RECONCILIATION-REPORT.txt
+  4. Take action on items listed in report
+
+MONTHLY (Vendor Check Only - 10-20 minutes):
+  1. node check-product-availability.js
+  2. Review output/vendor-availability-report.json
+  3. Check for new discontinued products
+  4. Update sites if discontinued items found
+
+BEFORE IMPORT (5-10 minutes):
+  1. node check-wordpress-products.js
+  2. Review output/wordpress-sync-report.json
+  3. See which products are missing
+  4. Filter wp_all_import_products.csv to missing items
+  5. Run WordPress All Import with filtered file
+
+SHOPIFY SYNC (5-10 minutes):
+  1. node check-shopify-products.js
+  2. Review output/shopify-sync-report.json
+  3. See which products are missing
+  4. Use shopify_products_full.csv for import
+
+================================================================================
+OUTPUT FILES GENERATED
+================================================================================
+
+After running scripts, reports appear in output/ directory:
+
+JSON REPORTS (Machine-readable):
+  ✓ vendor-availability-report.json
+    Contains: available, discontinued, errors, summary
+
+  ✓ wordpress-sync-report.json
+    Contains: foundOnWP, missingFromWP, summary
+
+  ✓ shopify-sync-report.json
+    Contains: foundOnShopify, missingFromShopify, summary
+
+  ✓ product-reconciliation-report.json
+    Contains: summary, actions (remove, add, update)
+
+TEXT REPORTS (Human-readable):
+  ✓ RECONCILIATION-REPORT.txt
+    → READ THIS! Contains action items and recommendations
+
+================================================================================
+COMMON SCENARIOS & SOLUTIONS
+================================================================================
+
+SCENARIO 1: Product Discontinued by Vendor
+  1. Run: node run-full-reconciliation.js
+  2. Find: output/RECONCILIATION-REPORT.txt → "Products to Remove"
+  3. Action: Delete from WordPress and Shopify
+
+SCENARIO 2: Products Missing from WordPress
+  1. Run: node check-wordpress-products.js
+  2. Find: output/wordpress-sync-report.json → missingFromWP
+  3. Action: Import using wp_all_import_products.csv
+
+SCENARIO 3: Products Missing from Shopify
+  1. Run: node check-shopify-products.js
+  2. Find: output/shopify-sync-report.json → missingFromShopify
+  3. Action: Import using shopify_products_full.csv
+
+SCENARIO 4: Complete Sync Status Check
+  1. Run: node run-full-reconciliation.js
+  2. Waits ~45 minutes for all checks
+  3. Review: output/RECONCILIATION-REPORT.txt
+  4. All three sources checked in one report
+
+================================================================================
+UNDERSTANDING THE REPORTS
+================================================================================
+
+vendor-availability-report.json
+  "available": [
+    { sku, title, status: "active" }
+  ]
+  "discontinued": [
+    { sku, title, reason: "Marked as discontinued..." }
+  ]
+  "summary": {
+    active: N,      ← Products still available
+    discontinued: N, ← Products discontinued
+    errors: N       ← Couldn't check
+  }
+
+wordpress-sync-report.json
+  "foundOnWP": [
+    { sku, title, status: "found on WordPress" }
+  ]
+  "missingFromWP": [
+    { sku, title, status: "missing from WordPress" }
+  ]
+  "summary": {
+    foundOnWP: N,      ← Products on WordPress
+    missingFromWP: N,  ← Products need adding
+    coverage: "X%"     ← Percentage of catalog on WP
+  }
+
+product-reconciliation-report.json
+  "actions": {
+    "productsToRemove": [
+      { sku, title, reason, action }
+    ],
+    "productsToAdd": [
+      { sku, title, platforms: [list], action }
+    ],
+    "productsToUpdate": [...]
+  }
+
+RECONCILIATION-REPORT.txt
+  Human-readable version of above with clear instructions
+
+================================================================================
+IMPLEMENTATION NOTES
+================================================================================
+
+VENDOR CHECKING:
+  - Visits each product URL on United Fabrics
+  - Checks if page loads (200 status) or 404
+  - Checks for "discontinued" text on page
+  - Timeout: 30 seconds per product
+
+WORDPRESS CHECKING:
+  - Uses search function on WordPress site
+  - Searches by product SKU
+  - Checks for product elements on result page
+  - Timeout: 20 seconds per search
+
+SHOPIFY CHECKING:
+  - Uses search function on Shopify store
+  - Searches by product title
+  - Checks for product data on result page
+  - Timeout: 20 seconds per search
+
+REPORT GENERATION:
+  - Reads all three JSON reports
+  - Compares across sources
+  - Identifies conflicts and gaps
+  - Generates action items
+
+================================================================================
+SECURITY & PRIVACY
+================================================================================
+
+WHAT'S NOT STORED:
+  ✓ Login credentials (use .env)
+  ✓ Customer data
+  ✓ Sensitive pricing (only wholesale)
+
+WHAT'S GENERATED:
+  ✓ Product availability status
+  ✓ SKU and title information
+  ✓ URLs checked
+  ✓ Basic error messages
+
+NO DATA IS UPLOADED:
+  ✓ Reports are local only
+  ✓ No cloud storage
+  ✓ No external APIs
+  ✓ All processing on your machine
+
+================================================================================
+TROUBLESHOOTING CHECKLIST
+================================================================================
+
+Scripts not running?
+  ☐ Check Node.js is installed: node --version
+  ☐ Check Playwright is installed: npm list playwright
+  ☐ Make sure you're in correct directory
+
+Reports not generating?
+  ☐ Wait for all 3 checks to complete first
+  ☐ Check output/ folder exists
+  ☐ Run individually: node generate-reconciliation-report.js
+
+Products not being found?
+  ☐ Verify product is published on site
+  ☐ Check product title spelling
+  ☐ Verify SKU is correct in catalog
+  ☐ Try searching manually in browser
+
+Script timing out?
+  ☐ Check internet connection
+  ☐ Run one script at a time
+  ☐ Increase timeout in script if needed
+  ☐ Check if vendor sites are accessible
+
+================================================================================
+INTEGRATION WORKFLOW
+================================================================================
+
+WEEKLY MONITORING:
+  Monday 2AM: node check-product-availability.js
+  Review: Any discontinuations?
+  Action: Update sites if needed
+
+MONTHLY FULL CHECK:
+  First Monday: node run-full-reconciliation.js
+  Review: RECONCILIATION-REPORT.txt
+  Action: Remove, add, update as needed
+
+BEFORE MAJOR IMPORT:
+  Pre-import: node check-wordpress-products.js
+  Filter: wp_all_import_products.csv to missing SKUs
+  Import: Use WordPress All Import plugin
+  Verify: Check product pages on WordPress
+
+QUARTERLY AUDIT:
+  Each quarter: Full reconciliation + manual verification
+  Document: Any issues found
+  Plan: Changes for next quarter
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+IMMEDIATE (Today):
+  1. Read: QUICK-RECONCILIATION-REFERENCE.txt
+  2. Run: node run-full-reconciliation.js
+  3. Review: output/RECONCILIATION-REPORT.txt
+  4. Note: Any actions needed
+
+SHORT-TERM (This Week):
+  1. Execute: Actions from reconciliation report
+  2. Remove: Discontinued products
+  3. Add: Missing products
+  4. Verify: Everything appears correctly
+
+ONGOING (Monthly):
+  1. Schedule: Weekly vendor checks
+  2. Monitor: For new discontinuations
+  3. Sync: New products when available
+  4. Review: Reports monthly
+
+ADVANCED (Optional):
+  1. Automate: Schedule with crontab
+  2. Alert: Set up notifications for discontinued products
+  3. Filter: Create automated import workflows
+  4. Dashboard: Display reconciliation status
+
+================================================================================
+SUPPORT RESOURCES
+================================================================================
+
+Quick Questions:
+  → See: QUICK-RECONCILIATION-REFERENCE.txt
+
+Detailed Help:
+  → See: PRODUCT-RECONCILIATION-GUIDE.md
+
+Error Messages:
+  → Check: output/[report-name].json for error details
+  → Look for: "errors" array in JSON reports
+
+Specific Issues:
+  1. Check troubleshooting section above
+  2. Review script comments for code details
+  3. Test individual scripts for isolated issues
+
+================================================================================
+FINAL CHECKLIST
+================================================================================
+
+Before running reconciliation, verify:
+  ☐ Internet connection is working
+  ☐ United Fabrics site is accessible
+  ☐ bestupholsteryfabric.com is accessible
+  ☐ upholsteryfabricbytheyard.com is accessible
+  ☐ Node.js is installed (node --version)
+  ☐ You're in the Fabric Scraper directory
+
+After running reconciliation:
+  ☐ All reports generated in output/
+  ☐ RECONCILIATION-REPORT.txt exists
+  ☐ Reviewed report for action items
+  ☐ Identified products to remove/add/update
+  ☐ Created action plan
+
+================================================================================
+
+Ready to start? Run:
+  node run-full-reconciliation.js
+
+Need help? Check:
+  QUICK-RECONCILIATION-REFERENCE.txt
+
+Full details? See:
+  PRODUCT-RECONCILIATION-GUIDE.md
+
+================================================================================

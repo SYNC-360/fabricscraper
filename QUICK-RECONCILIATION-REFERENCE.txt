@@ -1,0 +1,208 @@
+================================================================================
+                 PRODUCT RECONCILIATION QUICK REFERENCE
+================================================================================
+
+PURPOSE:
+Identify and manage:
+- Products discontinued by vendor (United Fabrics)
+- Products missing from WordPress (bestupholsteryfabric.com)
+- Products missing from Shopify (upholsteryfabricbytheyard.com)
+
+================================================================================
+QUICK START (Choose One)
+================================================================================
+
+OPTION 1: Run Everything (Recommended for first time)
+$ node run-full-reconciliation.js
+Duration: 30-60 minutes
+Output: Complete reconciliation report with action items
+
+OPTION 2: Check Only Vendor
+$ node check-product-availability.js
+Duration: 10-20 minutes
+Output: vendor-availability-report.json
+
+OPTION 3: Check Only WordPress
+$ node check-wordpress-products.js
+Duration: 5-10 minutes
+Output: wordpress-sync-report.json
+
+OPTION 4: Check Only Shopify
+$ node check-shopify-products.js
+Duration: 5-10 minutes
+Output: shopify-sync-report.json
+
+================================================================================
+WHAT EACH SCRIPT DOES
+================================================================================
+
+check-product-availability.js
+  ✓ Visits each product on United Fabrics
+  ✓ Checks if page loads (not 404)
+  ✓ Checks if marked discontinued
+  ✓ Reports status for each product
+  → Output: vendor-availability-report.json
+
+check-wordpress-products.js
+  ✓ Searches WordPress for each product by SKU
+  ✓ Checks if product is published/active
+  ✓ Reports found vs missing
+  → Output: wordpress-sync-report.json
+
+check-shopify-products.js
+  ✓ Searches Shopify for each product by name
+  ✓ Checks if product is active
+  ✓ Reports found vs missing
+  → Output: shopify-sync-report.json
+
+generate-reconciliation-report.js
+  ✓ Combines all three reports
+  ✓ Identifies action items
+  ✓ Creates human-readable summary
+  → Output: product-reconciliation-report.json
+  → Output: RECONCILIATION-REPORT.txt (READ THIS!)
+
+================================================================================
+REPORT FILES EXPLAINED
+================================================================================
+
+vendor-availability-report.json
+├─ available: Products still available on vendor site
+├─ discontinued: Products marked discontinued
+├─ errors: Products that couldn't be checked
+└─ summary: {active: N, discontinued: N, errors: N}
+
+wordpress-sync-report.json
+├─ foundOnWP: Products exist on WordPress
+├─ missingFromWP: Products need to be added to WordPress
+└─ summary: {foundOnWP: N, missingFromWP: N}
+
+shopify-sync-report.json
+├─ foundOnShopify: Products exist on Shopify
+├─ missingFromShopify: Products need to be added to Shopify
+└─ summary: {foundOnShopify: N, missingFromShopify: N}
+
+product-reconciliation-report.json
+├─ summary: Overall status across all sources
+└─ actions:
+   ├─ productsToRemove: [discontinued items]
+   ├─ productsToAdd: [missing from stores]
+   └─ summary: Total actions needed
+
+RECONCILIATION-REPORT.txt
+→ READ THIS FILE FOR ACTION ITEMS!
+Contains human-readable recommendations
+
+================================================================================
+COMMON SCENARIOS
+================================================================================
+
+SCENARIO 1: First Time Reconciliation
+1. $ node run-full-reconciliation.js
+2. Open output/RECONCILIATION-REPORT.txt
+3. Follow the action items listed
+
+SCENARIO 2: Monthly Check
+1. $ node check-product-availability.js
+2. Look for new discontinuations
+3. If found, update WordPress and Shopify
+
+SCENARIO 3: Before Major Import
+1. $ node check-wordpress-products.js
+2. Review which products are missing
+3. Use missing products list for filtered import
+
+SCENARIO 4: Syncing Shopify Only
+1. $ node check-shopify-products.js
+2. Get list of missing products
+3. Import using shopify_products_full.csv
+
+================================================================================
+UNDERSTANDING ACTIONS
+================================================================================
+
+PRODUCTS TO REMOVE (Found in reconciliation report)
+→ Why: Product discontinued by vendor
+→ Action on WordPress: Archive or delete
+→ Action on Shopify: Archive or delete
+→ Next: Mark in inventory system as discontinued
+
+PRODUCTS TO ADD (Found in reconciliation report)
+→ Why: In your catalog but not on retail sites
+→ Action on WordPress: Use WordPress All Import with wp_all_import_products.csv
+→ Action on Shopify: Use shopify_products_full.csv import
+→ Next: Verify prices and inventory after import
+
+PRODUCTS TO UPDATE (Check report details)
+→ Why: Exists on site but outdated (pricing, stock)
+→ Action: Manual update or re-import with "Update" option
+→ Next: Verify changes took effect
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Scripts timing out?
+  → Run them one at a time instead of all together
+  → Check internet connection
+  → Try again with smaller batch
+
+Reports show errors?
+  → Check if sites are accessible (visit URLs manually)
+  → Verify product URLs are correct
+  → Check if vendor changed site structure
+
+Not finding products on WordPress/Shopify?
+  → Verify products are published (not draft)
+  → Check product is indexed by search
+  → Try searching for product name manually in browser
+  → May need to publish product first
+
+Reconciliation report not generating?
+  → Make sure all three checks completed first
+  → Check that report files exist in output/ folder
+  → Run: node generate-reconciliation-report.js separately
+
+================================================================================
+INTEGRATION GUIDE
+================================================================================
+
+After Running Reconciliation:
+
+1. REMOVE DISCONTINUED PRODUCTS
+   WordPress: Admin > Products > [search SKU] > Trash
+   Shopify: Products > [search] > More Actions > Archive
+
+2. ADD MISSING PRODUCTS
+   WordPress: All Import > New Import > Select CSV > Map Fields
+   Shopify: Products > Import > Upload CSV
+
+3. UPDATE OUTDATED DATA
+   Use same import files with "Update" option enabled
+
+4. VERIFY CHANGES
+   WordPress: Check product page shows correct price/stock
+   Shopify: Check product page shows correct price/stock
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+Immediate:
+  1. Run: node run-full-reconciliation.js
+  2. Read: output/RECONCILIATION-REPORT.txt
+  3. Take action on any items listed
+
+Ongoing (Monthly):
+  1. Run: node check-product-availability.js
+  2. Check for new discontinuations
+  3. Update sites if needed
+
+Automation (Optional):
+  1. Schedule reconciliation to run weekly
+  2. Set up alerts for discontinued products
+  3. Auto-import missing products
+
+================================================================================
+
+For full documentation, see: PRODUCT-RECONCILIATION-GUIDE.md

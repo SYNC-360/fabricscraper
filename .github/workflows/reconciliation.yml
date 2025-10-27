@@ -1,0 +1,94 @@
+name: Product Reconciliation Check
+
+on:
+  schedule:
+    # Run every Monday at 2 AM UTC (adjust timezone as needed)
+    - cron: '0 2 * * 1'
+  # Also allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  reconciliation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run full reconciliation
+        run: node run-full-reconciliation.js
+        continue-on-error: true
+      
+      - name: Check for discontinued products
+        id: check-discontinued
+        run: |
+          if grep -q '"discontinued":' output/vendor-availability-report.json && grep -q 'discontinued.*\[' output/vendor-availability-report.json; then
+            echo "has_discontinued=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_discontinued=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for missing products
+        id: check-missing
+        run: |
+          if grep -q '"missingFromWP":' output/wordpress-sync-report.json; then
+            echo "has_missing=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_missing=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Commit reports to repository
+        if: always()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add output/*.json output/*.txt -f
+          git commit -m "Automated reconciliation report - $(date)" || echo "No changes to commit"
+          git push
+      
+      - name: Create summary report
+        if: always()
+        run: |
+          echo "## Reconciliation Report Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Generated:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "output/RECONCILIATION-REPORT.txt" ]; then
+            echo "**Report Contents:**" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            head -50 output/RECONCILIATION-REPORT.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Discontinued Products: ${{ steps.check-discontinued.outputs.has_discontinued }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Missing Products: ${{ steps.check-missing.outputs.has_missing }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Send alert if discontinued products found
+        if: steps.check-discontinued.outputs.has_discontinued == 'true'
+        run: |
+          echo "⚠️ ALERT: Discontinued products detected!"
+          echo "Check output/vendor-availability-report.json for details"
+      
+      - name: Upload reports as artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reconciliation-reports
+          path: |
+            output/vendor-availability-report.json
+            output/wordpress-sync-report.json
+            output/shopify-sync-report.json
+            output/product-reconciliation-report.json
+            output/RECONCILIATION-REPORT.txt
+          retention-days: 90
